@@ -1,0 +1,583 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LOGBOOK DIGITAL - DIVISI FINANCE ACCOUNTING PT ADIPRIMA SURAPRINTA</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background:#f6f7fb; }
+    .sidebar { min-width:220px; max-width:260px; }
+    .sig-thumb { width:80px; height:40px; object-fit:contain; border:1px solid #ddd; }
+    .required::after{ content: '*'; color: #d00; margin-left:4px; }
+    .table-wrap{ max-height:58vh; overflow:auto; }
+    pre.logline{ white-space:pre-wrap; word-break:break-word; }
+  </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">LOGBOOK DIGITAL - DIVISI FINANCE ACCOUNTING</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="#" id="btnExport">Ekspor CSV</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" id="btnClear">Reset Local</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+<div class="container-fluid">
+  <div class="row">
+    <aside class="col-md-2 sidebar p-3 bg-white border-end vh-100">
+      <h6 class="mb-3">Menu</h6>
+      <div class="list-group" role="tablist">
+        <a href="#dashboard" class="list-group-item list-group-item-action active" data-bs-toggle="list">Dashboard</a>
+        <a href="#logbook" class="list-group-item list-group-item-action" data-bs-toggle="list">Logbook Transaksi</a>
+        <a href="#invoice" class="list-group-item list-group-item-action" data-bs-toggle="list">Invoice</a>
+        <a href="#pic" class="list-group-item list-group-item-action" data-bs-toggle="list">Data PIC</a>
+        <a href="#history" class="list-group-item list-group-item-action" data-bs-toggle="list">History Aktivitas</a>
+      </div>
+      <hr>
+      <small class="text-muted">PT ADIPRIMA SURAPRINTA</small>
+    </aside>
+
+    <main class="col-md-10 p-4">
+      <div class="tab-content">
+        <!-- Dashboard -->
+        <div class="tab-pane fade show active" id="dashboard">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Dashboard</h3>
+            <div>
+              <small id="lastSaved" class="text-muted"></small>
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h6>Total Transaksi</h6>
+                  <h2 id="statTotal">0</h2>
+                  <small class="text-muted">Jumlah semua transaksi</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h6>Transaksi Belum Dicek</h6>
+                  <h2 id="statPending">0</h2>
+                  <small class="text-muted">Perlu pengecekan / tanda tangan</small>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card shadow-sm">
+                <div class="card-body">
+                  <h6>Jumlah PIC</h6>
+                  <h2 id="statPIC">0</h2>
+                  <small class="text-muted">PIC terdaftar</small>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <hr>
+          <h5>Filter Cepat</h5>
+          <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+              <label class="form-label">Dari</label>
+              <input id="fFrom" type="date" class="form-control">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Sampai</label>
+              <input id="fTo" type="date" class="form-control">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">PIC</label>
+              <select id="fPIC" class="form-select"><option value="">-- Semua --</option></select>
+            </div>
+            <div class="col-md-3">
+              <button id="fApply" class="btn btn-primary w-100">Terapkan Filter</button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Logbook -->
+        <div class="tab-pane fade" id="logbook">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Logbook Transaksi</h3>
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAddTx">Tambah Transaksi</button>
+          </div>
+
+          <div class="card shadow-sm mb-3">
+            <div class="card-body table-wrap">
+              <table class="table table-sm table-hover" id="tblTx">
+                <thead class="table-light">
+                  <tr>
+                    <th>#</th>
+                    <th>Tanggal</th>
+                    <th>Tagihan</th>
+                    <th>Invoice</th>
+                    <th>Nominal (Rp)</th>
+                    <th>PIC</th>
+                    <th>Ttd</th>
+                    <th>Checklist</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Invoice -->
+        <div class="tab-pane fade" id="invoice">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Invoice</h3>
+            <small class="text-muted">Pilih PIC yang bertanggung jawab atas proses ini pada saat input transaksi.</small>
+          </div>
+          <div class="card shadow-sm mb-3">
+            <div class="card-body table-wrap">
+              <table class="table table-sm" id="tblInvoice">
+                <thead class="table-light">
+                  <tr>
+                    <th>#</th>
+                    <th>Invoice</th>
+                    <th>Tagihan</th>
+                    <th>Nominal</th>
+                    <th>PIC Penanggung Jawab</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data PIC -->
+        <div class="tab-pane fade" id="pic">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>Data PIC</h3>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalAddPIC">Tambah PIC</button>
+          </div>
+
+          <div class="card shadow-sm">
+            <div class="card-body table-wrap">
+              <table class="table table-sm" id="tblPIC">
+                <thead class="table-light">
+                  <tr>
+                    <th>#</th>
+                    <th>Nama</th>
+                    <th>Jabatan</th>
+                    <th>Email</th>
+                    <th>Telp</th>
+                    <th>Tanda Tangan</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- History -->
+        <div class="tab-pane fade" id="history">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>History Aktivitas</h3>
+            <div>
+              <button id="btnClearHistory" class="btn btn-outline-danger">Hapus History</button>
+            </div>
+          </div>
+          <div class="card shadow-sm mb-3">
+            <div class="card-body" id="historyWrap">
+              <!-- history lines -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Modal Add Transaction -->
+<div class="modal fade" id="modalAddTx" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form id="formTx">
+      <div class="modal-header">
+        <h5 class="modal-title">Tambah / Edit Transaksi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row g-2">
+          <div class="col-md-4">
+            <label class="form-label required">Tanggal Transaksi</label>
+            <input required name="tanggal" type="date" class="form-control">
+          </div>
+          <div class="col-md-8">
+            <label class="form-label required">Tagihan</label>
+            <input required name="tagihan" type="text" class="form-control" placeholder="Nama / Deskripsi tagihan">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label required">Invoice</label>
+            <input required name="invoice" type="text" class="form-control" placeholder="Nomor invoice">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label required">Nominal (Rp)</label>
+            <input required name="nominal" type="number" min="0" class="form-control">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label required">PIC</label>
+            <select required name="pic" class="form-select" id="selectPIC">
+              <option value="">-- Pilih PIC --</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Upload Tanda Tangan (opsional)</label>
+            <input name="ttd" type="file" accept="image/*" class="form-control">
+            <small class="text-muted">File image akan disimpan sebagai data URL di localStorage.</small>
+          </div>
+          <div class="col-12 mt-2">
+            <label class="form-label">Catatan</label>
+            <textarea name="catatan" class="form-control" rows="2"></textarea>
+          </div>
+          <input type="hidden" name="id">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Add PIC -->
+<div class="modal fade" id="modalAddPIC" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form id="formPIC">
+      <div class="modal-header">
+        <h5 class="modal-title">Tambah / Edit PIC</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="mb-2">
+          <label class="form-label required">Nama</label>
+          <input required name="nama" type="text" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Jabatan</label>
+          <input name="jabatan" type="text" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Email</label>
+          <input name="email" type="email" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Telp</label>
+          <input name="telp" type="tel" class="form-control">
+        </div>
+        <div class="mb-2">
+          <label class="form-label">Tanda Tangan (upload image)</label>
+          <input name="ttd" type="file" accept="image/*" class="form-control">
+        </div>
+        <input type="hidden" name="id">
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+        <button type="submit" class="btn btn-primary">Simpan PIC</button>
+      </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+// --- Storage keys ---
+const KEY_TX = 'logbook_transactions_v1';
+const KEY_PIC = 'logbook_pics_v1';
+const KEY_HISTORY = 'logbook_history_v1';
+
+// --- Helpers ---
+const qs = s => document.querySelector(s);
+const qsa = s => document.querySelectorAll(s);
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+function nowStr(){ return new Date().toLocaleString(); }
+
+function readFileAsDataURL(file){
+  return new Promise((res, rej) => {
+    if(!file) return res(null);
+    const r = new FileReader();
+    r.onload = () => res(r.result);
+    r.onerror = () => rej(new Error('Gagal membaca file'));
+    r.readAsDataURL(file);
+  });
+}
+
+// --- Storage ---
+function loadPICs(){ const raw = localStorage.getItem(KEY_PIC); return raw ? JSON.parse(raw) : []; }
+function savePICs(arr){ localStorage.setItem(KEY_PIC, JSON.stringify(arr)); }
+function loadTx(){ const raw = localStorage.getItem(KEY_TX); return raw ? JSON.parse(raw) : []; }
+function saveTx(arr){ localStorage.setItem(KEY_TX, JSON.stringify(arr)); qs('#lastSaved').textContent = 'Terakhir disimpan: ' + nowStr(); }
+function loadHistory(){ const raw = localStorage.getItem(KEY_HISTORY); return raw ? JSON.parse(raw) : []; }
+function saveHistory(arr){ localStorage.setItem(KEY_HISTORY, JSON.stringify(arr)); }
+
+// --- History ---
+function pushHistory(type, message, meta){
+  const h = loadHistory();
+  const entry = { id: uid(), time: new Date().toISOString(), timeText: nowStr(), type, message, meta: meta||null };
+  h.unshift(entry); // newest first
+  // keep max 1000 entries for safety
+  if(h.length>1000) h.length = 1000;
+  saveHistory(h);
+  renderHistory();
+}
+
+// --- Renderers ---
+function renderPICTable(){
+  const tbl = qs('#tblPIC tbody'); tbl.innerHTML='';
+  const pics = loadPICs();
+  pics.forEach((p,i)=>{
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>${escapeHtml(p.nama)}</td>
+      <td>${escapeHtml(p.jabatan||'')}</td>
+      <td>${escapeHtml(p.email||'')}</td>
+      <td>${escapeHtml(p.telp||'')}</td>
+      <td>${p.ttd ? '<img src="'+p.ttd+'" class="sig-thumb"/>' : ''}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary btnEditPIC" data-id="${p.id}">Edit</button>
+        <button class="btn btn-sm btn-outline-danger btnDelPIC" data-id="${p.id}">Hapus</button>
+      </td>
+    `;
+    tbl.appendChild(tr);
+  });
+  // populate select
+  const sel = qs('#selectPIC'); sel.innerHTML = '<option value="">-- Pilih PIC --</option>';
+  const fPIC = qs('#fPIC'); fPIC.innerHTML = '<option value="">-- Semua --</option>';
+  pics.forEach(p=>{
+    const o = document.createElement('option'); o.value = p.id; o.textContent = p.nama + (p.jabatan? ' — '+p.jabatan:''); sel.appendChild(o);
+    const o2 = o.cloneNode(true); fPIC.appendChild(o2);
+  });
+  qs('#statPIC').textContent = pics.length;
+}
+
+function renderTxTable(filter={}){
+  const tbl = qs('#tblTx tbody'); tbl.innerHTML='';
+  const rows = loadTx();
+  let filtered = rows.slice();
+  if(filter.from) filtered = filtered.filter(r=> new Date(r.tanggal) >= new Date(filter.from));
+  if(filter.to) filtered = filtered.filter(r=> new Date(r.tanggal) <= new Date(filter.to));
+  if(filter.pic) filtered = filtered.filter(r=> r.pic === filter.pic);
+
+  filtered.forEach((r,i)=>{
+    const pics = loadPICs();
+    const picObj = pics.find(p=>p.id===r.pic) || {};
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>${escapeHtml(r.tanggal)}</td>
+      <td>${escapeHtml(r.tagihan)}</td>
+      <td>${escapeHtml(r.invoice)}</td>
+      <td>${Number(r.nominal).toLocaleString('id-ID')}</td>
+      <td>${escapeHtml(picObj.nama||'--')}</td>
+      <td>${r.ttd ? '<img src="'+r.ttd+'" class="sig-thumb"/>' : ''}</td>
+      <td><input type="checkbox" class="form-check-input chkDone" data-id="${r.id}" ${r.checked? 'checked':''}></td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary btnEditTx" data-id="${r.id}">Edit</button>
+        <button class="btn btn-sm btn-outline-danger btnDelTx" data-id="${r.id}">Hapus</button>
+      </td>
+    `;
+    tbl.appendChild(tr);
+  });
+
+  // invoice table render
+  renderInvoiceTable();
+
+  qs('#statTotal').textContent = rows.length;
+  qs('#statPending').textContent = rows.filter(r=>!r.checked).length;
+}
+
+function renderInvoiceTable(){
+  const tbl = qs('#tblInvoice tbody'); tbl.innerHTML='';
+  const rows = loadTx();
+  rows.forEach((r,i)=>{
+    const pics = loadPICs();
+    const picObj = pics.find(p=>p.id===r.pic) || {};
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td>${escapeHtml(r.invoice)}</td>
+      <td>${escapeHtml(r.tagihan)}</td>
+      <td>${Number(r.nominal).toLocaleString('id-ID')}</td>
+      <td>${escapeHtml(picObj.nama||'--')}</td>
+      <td>${r.checked ? '<span class="badge bg-success">Sudah Diverifikasi</span>' : '<span class="badge bg-warning">Menunggu</span>'}</td>
+      <td>
+        <button class="btn btn-sm btn-outline-primary btnViewInv" data-id="${r.id}">Lihat</button>
+      </td>
+    `;
+    tbl.appendChild(tr);
+  });
+}
+
+function renderHistory(){
+  const wrap = qs('#historyWrap'); wrap.innerHTML = '';
+  const h = loadHistory();
+  if(h.length===0){ wrap.innerHTML = '<p class="text-muted">Belum ada aktivitas.</p>'; return; }
+  h.forEach(entry=>{
+    const div = document.createElement('div'); div.className = 'mb-2';
+    div.innerHTML = `<small class="text-muted">${escapeHtml(entry.timeText)}</small><div class="logline">${escapeHtml(entry.message)}</div><hr>`;
+    wrap.appendChild(div);
+  });
+}
+
+function escapeHtml(s){ if(!s && s!==0) return ''; return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+// --- Events & Logic ---
+
+document.addEventListener('DOMContentLoaded', ()=>{
+  renderPICTable();
+  renderTxTable();
+  renderHistory();
+
+  // Form PIC
+  qs('#formPIC').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    let pics = loadPICs();
+    const id = fd.get('id') || uid();
+    const ttdFile = fd.get('ttd');
+    const ttdData = ttdFile && ttdFile.size ? await readFileAsDataURL(ttdFile) : null;
+    const obj = {
+      id, nama: fd.get('nama'), jabatan: fd.get('jabatan'), email: fd.get('email'), telp: fd.get('telp'),
+      ttd: ttdData || (pics.find(p=>p.id===id)?.ttd) || null
+    };
+    const idx = pics.findIndex(p=>p.id===id);
+    if(idx>=0){ pics[idx] = obj; savePICs(pics); pushHistory('PIC','Mengubah data PIC: '+obj.nama, {picId:id}); }
+    else { pics.push(obj); savePICs(pics); pushHistory('PIC','Menambahkan PIC baru: '+obj.nama, {picId:id}); }
+    renderPICTable();
+    bootstrap.Modal.getInstance(qs('#modalAddPIC')).hide();
+  });
+
+  // Form Tx
+  qs('#formTx').addEventListener('submit', async e=>{
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    let tx = loadTx();
+    const id = fd.get('id') || uid();
+    const ttdFile = fd.get('ttd');
+    const ttdData = ttdFile && ttdFile.size ? await readFileAsDataURL(ttdFile) : null;
+    const obj = {
+      id, tanggal: fd.get('tanggal'), tagihan: fd.get('tagihan'), invoice: fd.get('invoice'), nominal: Number(fd.get('nominal')||0), pic: fd.get('pic'), ttd: ttdData || (tx.find(t=>t.id===id)?.ttd) || null, catatan: fd.get('catatan'), checked: false
+    };
+    const idx = tx.findIndex(t=>t.id===id);
+    if(idx>=0){ tx[idx] = Object.assign({}, tx[idx], obj); saveTx(tx); pushHistory('Transaksi','Mengubah transaksi: '+obj.invoice+' oleh PIC:'+obj.pic, {txId:id}); }
+    else{ tx.push(obj); saveTx(tx); pushHistory('Transaksi','Menambahkan transaksi: '+obj.invoice+' Nominal: Rp '+Number(obj.nominal).toLocaleString('id-ID'), {txId:id}); }
+    renderTxTable();
+    bootstrap.Modal.getInstance(qs('#modalAddTx')).hide();
+  });
+
+  // Delegate clicks
+  document.body.addEventListener('click', e=>{
+    // Edit PIC
+    if(e.target.classList.contains('btnEditPIC')){
+      const id = e.target.dataset.id; const pics = loadPICs(); const p = pics.find(x=>x.id===id);
+      if(!p) return alert('PIC tidak ditemukan');
+      const form = qs('#formPIC'); form.reset(); form.nama.value = p.nama; form.jabatan.value = p.jabatan; form.email.value = p.email; form.telp.value = p.telp; form.id.value = p.id;
+      new bootstrap.Modal(qs('#modalAddPIC')).show();
+    }
+    // Delete PIC
+    if(e.target.classList.contains('btnDelPIC')){
+      if(!confirm('Hapus PIC ini?')) return;
+      const id = e.target.dataset.id; let pics = loadPICs(); const p = pics.find(x=>x.id===id);
+      pics = pics.filter(p=>p.id!==id); savePICs(pics); renderPICTable(); renderTxTable(); pushHistory('PIC','Menghapus PIC: '+(p?.nama||id), {picId:id});
+    }
+    // Edit Tx
+    if(e.target.classList.contains('btnEditTx')){
+      const id = e.target.dataset.id; const tx = loadTx(); const t = tx.find(x=>x.id===id);
+      if(!t) return alert('Transaksi tidak ditemukan');
+      const form = qs('#formTx'); form.reset(); form.tanggal.value = t.tanggal; form.tagihan.value = t.tagihan; form.invoice.value = t.invoice; form.nominal.value = t.nominal; form.pic.value = t.pic; form.catatan.value = t.catatan; form.id.value = t.id;
+      new bootstrap.Modal(qs('#modalAddTx')).show();
+    }
+    // Delete Tx
+    if(e.target.classList.contains('btnDelTx')){
+      if(!confirm('Hapus transaksi ini?')) return;
+      const id = e.target.dataset.id; let tx = loadTx(); const t = tx.find(x=>x.id===id);
+      tx = tx.filter(t=>t.id!==id); saveTx(tx); renderTxTable(); pushHistory('Transaksi','Menghapus transaksi: '+(t?.invoice||id)+' Nominal: Rp '+Number(t?.nominal||0).toLocaleString('id-ID'), {txId:id});
+    }
+    // View Invoice
+    if(e.target.classList.contains('btnViewInv')){
+      const id = e.target.dataset.id; const t = loadTx().find(x=>x.id===id);
+      if(!t) return; alert('Invoice: '+t.invoice + "
+Tagihan: " + t.tagihan + "
+Nominal: Rp " + Number(t.nominal).toLocaleString('id-ID'));
+    }
+  });
+
+  // Checkbox change
+  document.body.addEventListener('change', e=>{
+    if(e.target.classList.contains('chkDone')){
+      const id = e.target.dataset.id; const tx = loadTx(); const idx = tx.findIndex(t=>t.id===id); if(idx<0) return; tx[idx].checked = e.target.checked; saveTx(tx); renderTxTable(); pushHistory('Transaksi', (e.target.checked? 'Menandai transaksi terverifikasi: ':'Mencabut verifikasi: ')+ (tx[idx].invoice||id), {txId:id, checked: tx[idx].checked});
+    }
+  });
+
+  // Filter apply
+  qs('#fApply').addEventListener('click', ()=>{
+    const from = qs('#fFrom').value; const to = qs('#fTo').value; const pic = qs('#fPIC').value;
+    renderTxTable({from: from||null, to: to||null, pic: pic||null});
+  });
+
+  // Export CSV
+  qs('#btnExport').addEventListener('click', ()=>{
+    const rows = loadTx(); if(rows.length===0) return alert('Tidak ada data untuk diekspor');
+    const lines = [ ['Tanggal','Tagihan','Invoice','Nominal','PIC','Catatan','Checked'].join(',') ];
+    const pics = loadPICs();
+    rows.forEach(r=>{
+      const picName = (pics.find(p=>p.id===r.pic)||{}).nama || '';
+      lines.push([r.tanggal, '"'+(r.tagihan||'').replaceAll('"','""')+'"', r.invoice, r.nominal, '"'+picName.replaceAll('"','""')+'"', '"'+(r.catatan||'').replaceAll('"','""')+'"', r.checked? '1':'0'].join(','));
+    });
+    const csv = lines.join('
+');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'logbook_transaksi.csv'; a.click(); URL.revokeObjectURL(url);
+    pushHistory('Sistem','Mengekspor data transaksi ke CSV', {});
+  });
+
+  // Clear local
+  qs('#btnClear').addEventListener('click', ()=>{
+    if(!confirm('Reset semua data localStorage?')) return; localStorage.removeItem(KEY_TX); localStorage.removeItem(KEY_PIC); localStorage.removeItem(KEY_HISTORY); renderPICTable(); renderTxTable(); renderHistory(); pushHistory('Sistem','Melakukan reset data lokal (semua data dihapus)', {});
+  });
+
+  // Clear history only
+  qs('#btnClearHistory').addEventListener('click', ()=>{
+    if(!confirm('Hapus seluruh history aktivitas?')) return; localStorage.removeItem(KEY_HISTORY); renderHistory(); pushHistory('Sistem','Menghapus history aktivitas', {});
+  });
+
+  // Sidebar nav uses bootstrap list, hook to re-render when shown
+  const listLinks = qsa('[data-bs-toggle="list"]'); listLinks.forEach(a=> a.addEventListener('shown.bs.tab', ()=>{ renderPICTable(); renderTxTable(); renderHistory(); }));
+
+  // Accessibility: ensure selects updated
+  setInterval(()=>{ renderPICTable(); }, 30000);
+
+});
+
+</script>
+</body>
+</html>
